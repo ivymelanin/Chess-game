@@ -113,7 +113,7 @@ def drawchesspieces():
             if color%2==0:
                 square(xpos,ypos,width,height,white)
                 if not chessBoard.gameTiles[rows][column].pieceonTile.tostring() == "-":
-                    img = pygame.image.load("./chessart/"
+                    img = pygame.image.load("./images/"
                                             + chessBoard.gameTiles[rows][column].pieceonTile.alliance[0].upper()
                                             + chessBoard.gameTiles[rows][column].pieceonTile.tostring().upper()
                                             + ".png")
@@ -125,7 +125,7 @@ def drawchesspieces():
             else:
                 square(xpos,ypos,width,height,black)
                 if not chessBoard.gameTiles[rows][column].pieceonTile.tostring() == "-":
-                    img = pygame.image.load("./chessart/"
+                    img = pygame.image.load("./images/"
                                         + chessBoard.gameTiles[rows][column].pieceonTile.alliance[0].upper()
                                         + chessBoard.gameTiles[rows][column].pieceonTile.tostring().upper()
                                         + ".png")
@@ -258,7 +258,7 @@ if saki=='2 player':
                     coord=pygame.mouse.get_pos()
                     m=math.floor(coord[0]/100)
                     n=math.floor(coord[1]/100)
-                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    imgx=pygame.transform.scale(pygame.image.load("./images/red_square.png",), (100,100))
                     mx=[]
                     ma=[]
                     for move in array:
@@ -276,7 +276,7 @@ if saki=='2 player':
                     coord=pygame.mouse.get_pos()
                     m=math.floor(coord[0]/100)
                     n=math.floor(coord[1]/100)
-                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    imgx=pygame.transform.scale(pygame.image.load("./images/red_square.png",), (100,100))
                     mx=[]
                     ma=[]
                     for move in array:
@@ -431,10 +431,10 @@ if saki=='2 player':
                     if promotion==True:
                         if  chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and x==7 and y==6:
                             pygame.draw.rect(gamedisplay,(255,255,255),[x*100-100,(y*100)-200,200,200])
-                            imgx=pygame.transform.scale(pygame.image.load("./chessart/BQ.png",), (100,100))
-                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/BR.png",), (100,100))
-                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/BN.png",), (100,100))
-                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/BB.png",), (100,100))
+                            imgx=pygame.transform.scale(pygame.image.load("./images/BQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./images/BR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./images/BN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./images/BB.png",), (100,100))
                             gamedisplay.blit(imgx,[x*100-100,(y*100)-200])
                             gamedisplay.blit(imgx1,[(x*100),(y*100)-200])
                             gamedisplay.blit(imgx2,[x*100-100,(y*100)-100])
@@ -443,10 +443,10 @@ if saki=='2 player':
 
                         elif chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P':
                             pygame.draw.rect(gamedisplay,(255,255,255),[x*100,(y*100)-200,200,200])
-                            imgx=pygame.transform.scale(pygame.image.load("./chessart/BQ.png",), (100,100))
-                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/BR.png",), (100,100))
-                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/BN.png",), (100,100))
-                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/BB.png",), (100,100))
+                            imgx=pygame.transform.scale(pygame.image.load("./images/BQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./images/BR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./images/BN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./images/BB.png",), (100,100))
                             gamedisplay.blit(imgx,[x*100,(y*100)-200])
                             gamedisplay.blit(imgx1,[(x*100)+100,(y*100)-200])
                             gamedisplay.blit(imgx2,[x*100,(y*100)-100])
@@ -455,10 +455,10 @@ if saki=='2 player':
 
                         elif  chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and x==7 and y==1:
                             pygame.draw.rect(gamedisplay,(0,0,0),[x*100-100,(y*100)+100,200,200])
-                            imgx=pygame.transform.scale(pygame.image.load("./chessart/WQ.png",), (100,100))
-                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/WR.png",), (100,100))
-                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/WN.png",), (100,100))
-                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/WB.png",), (100,100))
+                            imgx=pygame.transform.scale(pygame.image.load("./images/WQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./images/WR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./images/WN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./images/WB.png",), (100,100))
                             gamedisplay.blit(imgx,[x*100-100,(y*100)+200])
                             gamedisplay.blit(imgx1,[(x*100),(y*100)+200])
                             gamedisplay.blit(imgx2,[x*100-100,(y*100)+100])
@@ -467,10 +467,10 @@ if saki=='2 player':
 
                         elif chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p':
                             pygame.draw.rect(gamedisplay,(0,0,0),[x*100,(y*100)+100,200,200])
-                            imgx=pygame.transform.scale(pygame.image.load("./chessart/WQ.png",), (100,100))
-                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/WR.png",), (100,100))
-                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/WN.png",), (100,100))
-                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/WB.png",), (100,100))
+                            imgx=pygame.transform.scale(pygame.image.load("./images/WQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./images/WR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./images/WN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./images/WB.png",), (100,100))
                             gamedisplay.blit(imgx,[x*100,(y*100)+200])
                             gamedisplay.blit(imgx1,[(x*100)+100,(y*100)+200])
                             gamedisplay.blit(imgx2,[x*100,(y*100)+100])
@@ -541,7 +541,7 @@ if saki=='2 player':
                             moves=[]
 
 
-                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    imgx=pygame.transform.scale(pygame.image.load("./images/red_square.png",), (100,100))
                     for move in moves:
                         mx=[move[1]*100,move[0]*100]
                         gamedisplay.blit(imgx,mx)
@@ -719,7 +719,7 @@ if saki=='ai':
                     coord=pygame.mouse.get_pos()
                     m=math.floor(coord[0]/100)
                     n=math.floor(coord[1]/100)
-                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    imgx=pygame.transform.scale(pygame.image.load("./images/red_square.png",), (100,100))
                     mx=[]
                     ma=[]
                     for move in array:
@@ -836,10 +836,10 @@ if saki=='ai':
 
                         if  chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and x==7 and y==1:
                             pygame.draw.rect(gamedisplay,(0,0,0),[x*100-100,(y*100)+100,200,200])
-                            imgx=pygame.transform.scale(pygame.image.load("./chessart/WQ.png",), (100,100))
-                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/WR.png",), (100,100))
-                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/WN.png",), (100,100))
-                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/WB.png",), (100,100))
+                            imgx=pygame.transform.scale(pygame.image.load("./images/BQ",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./images/WR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./images/WN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./images/WB.png",), (100,100))
                             gamedisplay.blit(imgx,[x*100-100,(y*100)+200])
                             gamedisplay.blit(imgx1,[(x*100),(y*100)+200])
                             gamedisplay.blit(imgx2,[x*100-100,(y*100)+100])
@@ -848,10 +848,10 @@ if saki=='ai':
 
                         elif chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p':
                             pygame.draw.rect(gamedisplay,(0,0,0),[x*100,(y*100)+100,200,200])
-                            imgx=pygame.transform.scale(pygame.image.load("./chessart/WQ.png",), (100,100))
-                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/WR.png",), (100,100))
-                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/WN.png",), (100,100))
-                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/WB.png",), (100,100))
+                            imgx=pygame.transform.scale(pygame.image.load("./images/WQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./images/WR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./images/WN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./images/WB.png",), (100,100))
                             gamedisplay.blit(imgx,[x*100,(y*100)+200])
                             gamedisplay.blit(imgx1,[(x*100)+100,(y*100)+200])
                             gamedisplay.blit(imgx2,[x*100,(y*100)+100])
@@ -906,7 +906,7 @@ if saki=='ai':
                         moves=[]
 
 
-                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    imgx=pygame.transform.scale(pygame.image.load("./images/red_square.png",), (100,100))
                     for move in moves:
                         mx=[move[1]*100,move[0]*100]
                         gamedisplay.blit(imgx,mx)
