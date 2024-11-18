@@ -1,12 +1,12 @@
 import pygame
-from board.chessboard import board
+from board.board import board
 import math
 from pieces.nullpiece import nullpiece
 from pieces.queen import queen
 from pieces.rook import rook
 from pieces.knight import knight
 from pieces.bishop import bishop
-from player.AI import AI
+from player.imaginary import imaginary
 import copy
 
 from board.move import move
@@ -22,23 +22,23 @@ chessBoard=board()
 chessBoard.createboard()
 chessBoard.printboard()
 movex=move()
-ai=AI()
+ai=imaginary()
 
 allTiles= []
 allpieces=[]
 
 ######################
 ######################
-green = (0, 255, 0)
+pink = (255, 105, 180)
 blue = (0, 0, 128)
 font = pygame.font.Font('freesansbold.ttf', 32)
-text = font.render('pychess', True, green, blue)
-text1 = font.render('AI',True,green)
-text2 = font.render('2 player',True,green)
-text3=font.render('Black won by checkmate', True, green)
-text4=font.render('White won by checkmate', True, green)
-text5=font.render('stalemate', True, green)
-text6=font.render('Made by: Ahmad Raza Khawaja', True, green)
+text = font.render('pychess', True, pink, blue)
+text1 = font.render('AI',True, pink)
+text2 = font.render('2 player',True, pink)
+text3=font.render('Black won by checkmate', True, pink)
+text4=font.render('White won by checkmate', True, pink)
+text5=font.render('stalemate', True, pink)
+text6=font.render('Made by: Lerato Khauta', True, pink)
 textRect = text.get_rect()
 textRect1 = text1.get_rect()
 textRect2 = text2.get_rect()
