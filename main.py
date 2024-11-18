@@ -1,800 +1,977 @@
-# Importing Modules
 import pygame
-# Initialising pygame module
+from board.chessboard import board
+import math
+from pieces.nullpiece import nullpiece
+from pieces.queen import queen
+from pieces.rook import rook
+from pieces.knight import knight
+from pieces.bishop import bishop
+from player.AI import AI
+import copy
+
+from board.move import move
+
+
+
 pygame.init()
-# Setting width and height of the Chess Game screen
-WIDTH = 800
-HEIGHT = 800
-screen = pygame.display.set_mode([WIDTH, HEIGHT])
-pygame.display.set_caption('Two-Player Chess Game')
-font = pygame.font.Font('freesansbold.ttf', 20)
-medium_font = pygame.font.Font('freesansbold.ttf', 40)
-big_font = pygame.font.Font('freesansbold.ttf', 50)
-timer = pygame.time.Clock()
-fps = 60
-# game variables and images
-white_pieces = ['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook',
-
-                'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn']
-
-white_locations = [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
-
-                   (0, 1), (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1)]
-
-black_pieces = ['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook',
-
-                'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn']
-
-black_locations = [(0, 7), (1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7),
-
-                   (0, 6), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6)]
-
-captured_pieces_white = []
-captured_pieces_black = []
-
-# 0 - whites turn no selection: 1-whites turn piece selected: 2- black turn no selection, 3 - black turn piece selected
-turn_step = 0
-selection = 100
-valid_moves = []
-# load in game piece images (queen, king, rook, bishop, knight, pawn) x 2
-black_queen = pygame.image.load('./images/black queen.png')
-black_queen = pygame.transform.scale(black_queen, (80, 80))
-black_queen_small = pygame.transform.scale(black_queen, (45, 45))
-black_king = pygame.image.load('./images/black king.png')
-black_king = pygame.transform.scale(black_king, (80, 80))
-black_king_small = pygame.transform.scale(black_king, (45, 45))
-black_rook = pygame.image.load('./images/black rook.png')
-black_rook = pygame.transform.scale(black_rook, (80, 80))
-black_rook_small = pygame.transform.scale(black_rook, (45, 45))
-black_bishop = pygame.image.load('./images/black bishop.png')
-black_bishop = pygame.transform.scale(black_bishop, (80, 80))
-black_bishop_small = pygame.transform.scale(black_bishop, (45, 45))
-black_knight = pygame.image.load('./images/black knight.png')
-black_knight = pygame.transform.scale(black_knight, (80, 80))
-black_knight_small = pygame.transform.scale(black_knight, (45, 45))
-black_pawn = pygame.image.load('./images/black pawn.png')
-black_pawn = pygame.transform.scale(black_pawn, (65, 65))
-black_pawn_small = pygame.transform.scale(black_pawn, (45, 45))
-white_queen = pygame.image.load('./images/white queen.png')
-white_queen = pygame.transform.scale(white_queen, (80, 80))
-white_queen_small = pygame.transform.scale(white_queen, (45, 45))
-white_king = pygame.image.load('./images/white king.png')
-white_king = pygame.transform.scale(white_king, (80, 80))
-white_king_small = pygame.transform.scale(white_king, (45, 45))
-white_rook = pygame.image.load('./images/white rook.png')
-white_rook = pygame.transform.scale(white_rook, (80, 80))
-white_rook_small = pygame.transform.scale(white_rook, (45, 45))
-white_bishop = pygame.image.load('./images/white bishop.png')
-white_bishop = pygame.transform.scale(white_bishop, (80, 80))
-white_bishop_small = pygame.transform.scale(white_bishop, (45, 45))
-white_knight = pygame.image.load('./images/white knight.png')
-white_knight = pygame.transform.scale(white_knight, (80, 80))
-white_knight_small = pygame.transform.scale(white_knight, (45, 45))
-white_pawn = pygame.image.load('./images/white pawn.png')
-white_pawn = pygame.transform.scale(white_pawn, (65, 65))
-white_pawn_small = pygame.transform.scale(white_pawn, (45, 45))
-
-white_images = [white_pawn, white_queen, white_king,
-
-                white_knight, white_rook, white_bishop]
-
-small_white_images = [white_pawn_small, white_queen_small, white_king_small, white_knight_small,
-
-                      white_rook_small, white_bishop_small]
-
-black_images = [black_pawn, black_queen, black_king,
-
-                black_knight, black_rook, black_bishop]
-
-small_black_images = [black_pawn_small, black_queen_small, black_king_small, black_knight_small,
-
-                      black_rook_small, black_bishop_small]
-
- piece_list = ['pawn', 'queen', 'king', 'knight', 'rook', 'bishop']
-
- # check variables/ flashing counter
-counter = 0
-winner = ''
-game_over = False
-
-# draw main game board
-def draw_board():
-
-    for i in range(32):
-
-        column = i % 4
-
-        row = i // 4
-
-        if row % 2 == 0:
-
-            pygame.draw.rect(screen, 'light gray', [
-
-                             600 - (column * 200), row * 100, 100, 100])
-
-        else:
-
-            pygame.draw.rect(screen, 'light gray', [
-
-                             700 - (column * 200), row * 100, 100, 100])
-
-        pygame.draw.rect(screen, 'gray', [0, 800, WIDTH, 100])
-
-        pygame.draw.rect(screen, 'gold', [0, 800, WIDTH, 100], 5)
-
-        pygame.draw.rect(screen, 'gold', [800, 0, 200, HEIGHT], 5)
-
-        status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
-
-                       'Black: Select a Piece to Move!', 'Black: Select a Destination!']
-
-        screen.blit(big_font.render(
-
-            status_text[turn_step], True, 'black'), (20, 820))
-
-        for i in range(9):
-
-            pygame.draw.line(screen, 'black', (0, 100 * i), (800, 100 * i), 2)
-
-            pygame.draw.line(screen, 'black', (100 * i, 0), (100 * i, 800), 2)
-
-        screen.blit(medium_font.render('FORFEIT', True, 'black'), (810, 830))
-
-  
-# draw pieces onto board
-def draw_pieces():
-
-    for i in range(len(white_pieces)):
-
-        index = piece_list.index(white_pieces[i])
-
-        if white_pieces[i] == 'pawn':
-
-            screen.blit(
-
-                white_pawn, (white_locations[i][0] * 100 + 22, white_locations[i][1] * 100 + 30))
-
-        else:
-
-            screen.blit(white_images[index], (white_locations[i]
-
-                        [0] * 100 + 10, white_locations[i][1] * 100 + 10))
-
-        if turn_step < 2:
-
-            if selection == i:
-
-                pygame.draw.rect(screen, 'red', [white_locations[i][0] * 100 + 1, white_locations[i][1] * 100 + 1,
-
-                                                 100, 100], 2)
-
- 
-
-    for i in range(len(black_pieces)):
-
-        index = piece_list.index(black_pieces[i])
-
-        if black_pieces[i] == 'pawn':
-
-            screen.blit(
-
-                black_pawn, (black_locations[i][0] * 100 + 22, black_locations[i][1] * 100 + 30))
-
-        else:
-
-            screen.blit(black_images[index], (black_locations[i]
-
-                        [0] * 100 + 10, black_locations[i][1] * 100 + 10))
-
-        if turn_step >= 2:
-
-            if selection == i:
-
-                pygame.draw.rect(screen, 'blue', [black_locations[i][0] * 100 + 1, black_locations[i][1] * 100 + 1,
-
-                                                  100, 100], 2)
-
- 
-# function to check all pieces valid options on board
-def check_options(pieces, locations, turn):
-    moves_list = []
-
-    all_moves_list = []
-
-    for i in range((len(pieces))):
-
-        location = locations[i]
-
-        piece = pieces[i]
-
-        if piece == 'pawn':
-
-            moves_list = check_pawn(location, turn)
-
-        elif piece == 'rook':
-
-            moves_list = check_rook(location, turn)
-
-        elif piece == 'knight':
-
-            moves_list = check_knight(location, turn)
-
-        elif piece == 'bishop':
-
-            moves_list = check_bishop(location, turn)
-
-        elif piece == 'queen':
-
-            moves_list = check_queen(location, turn)
-
-        elif piece == 'king':
-
-            moves_list = check_king(location, turn)
-
-        all_moves_list.append(moves_list)
-
-    return all_moves_list
-
- # check king valid moves
-def check_king(position, color):
-
-    moves_list = []
-
-    if color == 'white':
-
-        enemies_list = black_locations
-
-        friends_list = white_locations
-
-    else:
-
-        friends_list = black_locations
-
-        enemies_list = white_locations
-
-    # 8 squares to check for kings, they can go one square any direction
-
-    targets = [(1, 0), (1, 1), (1, -1), (-1, 0),
-
-               (-1, 1), (-1, -1), (0, 1), (0, -1)]
-
-    for i in range(8):
-
-        target = (position[0] + targets[i][0], position[1] + targets[i][1])
-
-        if target not in friends_list and 0 <= target[0] <= 7 and 0 <= target[1] <= 7:
-
-            moves_list.append(target)
-
-    return moves_list
-
- # check queen valid moves
-def check_queen(position, color):
-
-    moves_list = check_bishop(position, color)
-
-    second_list = check_rook(position, color)
-
-    for i in range(len(second_list)):
-
-        moves_list.append(second_list[i])
-
-    return moves_list
-
- # check bishop moves
-def check_bishop(position, color):
-
-    moves_list = []
-
-    if color == 'white':
-
-        enemies_list = black_locations
-
-        friends_list = white_locations
-
-    else:
-
-        friends_list = black_locations
-
-        enemies_list = white_locations
-
-    for i in range(4):  # up-right, up-left, down-right, down-left
-
-        path = True
-
-        chain = 1
-
-        if i == 0:
-
-            x = 1
-
-            y = -1
-
-        elif i == 1:
-
-            x = -1
-
-            y = -1
-
-        elif i == 2:
-
-            x = 1
-
-            y = 1
-
-        else:
-
-            x = -1
-
-            y = 1
-
-        while path:
-
-            if (position[0] + (chain * x), position[1] + (chain * y)) not in friends_list and 
-
-                    0 <= position[0] + (chain * x) <= 7 and 0 <= position[1] + (chain * y) <= 7:
-
-                moves_list.append((position[0] + (chain * x), position[1] + (chain * y)))
-
-                if (position[0] + (chain * x), position[1] + (chain * y)) in enemies_list:
-
-                    path = False
-
-                chain += 1
-
-            else:
-
-                path = False
-
-    return moves_list
-
- # check rook moves
-def check_rook(position, color):
-
-    moves_list = []
-
-    if color == 'white':
-
-        enemies_list = black_locations
-
-        friends_list = white_locations
-
-    else:
-
-        friends_list = black_locations
-
-        enemies_list = white_locations
-
-    for i in range(4):  # down, up, right, left
-
-        path = True
-
-        chain = 1
-
-        if i == 0:
-
-            x = 0
-
-            y = 1
-
-        elif i == 1:
-
-            x = 0
-
-            y = -1
-
-        elif i == 2:
-
-            x = 1
-
-            y = 0
-
-        else:
-
-            x = -1
-
-            y = 0
-
-        while path:
-
-            if (position[0] + (chain * x), position[1] + (chain * y)) not in friends_list and \
-
-                    0 <= position[0] + (chain * x) <= 7 and 0 <= position[1] + (chain * y) <= 7:
-
-                moves_list.append(
-
-                    (position[0] + (chain * x), position[1] + (chain * y)))
-
-                if (position[0] + (chain * x), position[1] + (chain * y)) in enemies_list:
-
-                    path = False
-
-                chain += 1
-
-            else:
-
-                path = False
-
-    return moves_list
-
-# check valid pawn moves
-def check_pawn(position, color):
-
-    moves_list = []
-
-    if color == 'white':
-
-        if (position[0], position[1] + 1) not in white_locations and \
-
-                (position[0], position[1] + 1) not in black_locations and position[1] < 7:
-
-            moves_list.append((position[0], position[1] + 1))
-
-        if (position[0], position[1] + 2) not in white_locations and \
-
-                (position[0], position[1] + 2) not in black_locations and position[1] == 1:
-
-            moves_list.append((position[0], position[1] + 2))
-
-        if (position[0] + 1, position[1] + 1) in black_locations:
-
-            moves_list.append((position[0] + 1, position[1] + 1))
-
-        if (position[0] - 1, position[1] + 1) in black_locations:
-
-            moves_list.append((position[0] - 1, position[1] + 1))
-
-    else:
-
-        if (position[0], position[1] - 1) not in white_locations and \
-
-                (position[0], position[1] - 1) not in black_locations and position[1] > 0:
-
-            moves_list.append((position[0], position[1] - 1))
-
-        if (position[0], position[1] - 2) not in white_locations and \
-
-                (position[0], position[1] - 2) not in black_locations and position[1] == 6:
-
-            moves_list.append((position[0], position[1] - 2))
-
-        if (position[0] + 1, position[1] - 1) in white_locations:
-
-            moves_list.append((position[0] + 1, position[1] - 1))
-
-        if (position[0] - 1, position[1] - 1) in white_locations:
-
-            moves_list.append((position[0] - 1, position[1] - 1))
-
-    return moves_list
-
- # check valid knight moves
-def check_knight(position, color):
-
-    moves_list = []
-
-    if color == 'white':
-
-        enemies_list = black_locations
-
-        friends_list = white_locations
-
-    else:
-
-        friends_list = black_locations
-
-        enemies_list = white_locations
-
-    # 8 squares to check for knights, they can go two squares in one direction and one in another
-
-    targets = [(1, 2), (1, -2), (2, 1), (2, -1),
-
-               (-1, 2), (-1, -2), (-2, 1), (-2, -1)]
-
-    for i in range(8):
-
-        target = (position[0] + targets[i][0], position[1] + targets[i][1])
-
-        if target not in friends_list and 0 <= target[0] <= 7 and 0 <= target[1] <= 7:
-
-            moves_list.append(target)
-
-    return moves_list
-
-# check for valid moves for just selected piece
-def check_valid_moves():
-
-    if turn_step < 2:
-
-        options_list = white_options
-
-    else:
-
-        options_list = black_options
-
-    valid_options = options_list[selection]
-
-    return valid_options
-
-# draw valid moves on screen
-def draw_valid(moves):
-
-    if turn_step < 2:
-
-        color = 'red'
-
-    else:
-
-        color = 'blue'
-
-    for i in range(len(moves)):
-
-        pygame.draw.circle(
-
-            screen, color, (moves[i][0] * 100 + 50, moves[i][1] * 100 + 50), 5)
-
-
-# draw captured pieces on side of screen
-def draw_captured():
-
-    for i in range(len(captured_pieces_white)):
-
-        captured_piece = captured_pieces_white[i]
-
-        index = piece_list.index(captured_piece)
-
-        screen.blit(small_black_images[index], (825, 5 + 50 * i))
-
-    for i in range(len(captured_pieces_black)):
-
-        captured_piece = captured_pieces_black[i]
-
-        index = piece_list.index(captured_piece)
-
-        screen.blit(small_white_images[index], (925, 5 + 50 * i))
-
- 
-# draw a flashing square around king if in check
-def draw_check():
-
-    if turn_step < 2:
-
-        if 'king' in white_pieces:
-
-            king_index = white_pieces.index('king')
-
-            king_location = white_locations[king_index]
-
-            for i in range(len(black_options)):
-
-                if king_location in black_options[i]:
-
-                    if counter < 15:
-
-                        pygame.draw.rect(screen, 'dark red', [white_locations[king_index][0] * 100 + 1,
-
-                                                              white_locations[king_index][1] * 100 + 1, 100, 100], 5)
-
-    else:
-
-        if 'king' in black_pieces:
-
-            king_index = black_pieces.index('king')
-
-            king_location = black_locations[king_index]
-
-            for i in range(len(white_options)):
-
-                if king_location in white_options[i]:
-
-                    if counter < 15:
-
-                        pygame.draw.rect(screen, 'dark blue', [black_locations[king_index][0] * 100 + 1,
-
-                                                               black_locations[king_index][1] * 100 + 1, 100, 100], 5)
-
-def draw_game_over():
-    pygame.draw.rect(screen, 'black', [200, 200, 400, 70])
-
-    screen.blit(font.render(
-
-        f'{winner} won the game!', True, 'white'), (210, 210))
-
-    screen.blit(font.render(f'Press ENTER to Restart!',
-
-                True, 'white'), (210, 240))
-
- # main game loop
-black_options = check_options(black_pieces, black_locations, 'black')
-white_options = check_options(white_pieces, white_locations, 'white')
-run = True
-while run:
-
-    timer.tick(fps)
-
-    if counter < 30:
-
-        counter += 1
-
-    else:
-
-        counter = 0
-
-    screen.fill('dark gray')
-
-    draw_board()
-
-    draw_pieces()
-
-    draw_captured()
-
-    draw_check()
-
-    if selection != 100:
-
-        valid_moves = check_valid_moves()
-
-        draw_valid(valid_moves)
-
-    # event handling
-
+gamedisplay= pygame.display.set_mode((800,800))
+pygame.display.set_caption("pychess")
+clock=pygame.time.Clock()
+
+chessBoard=board()
+chessBoard.createboard()
+chessBoard.printboard()
+movex=move()
+ai=AI()
+
+allTiles= []
+allpieces=[]
+
+######################
+######################
+green = (0, 255, 0)
+blue = (0, 0, 128)
+font = pygame.font.Font('freesansbold.ttf', 32)
+text = font.render('pychess', True, green, blue)
+text1 = font.render('AI',True,green)
+text2 = font.render('2 player',True,green)
+text3=font.render('Black won by checkmate', True, green)
+text4=font.render('White won by checkmate', True, green)
+text5=font.render('stalemate', True, green)
+text6=font.render('Made by: Ahmad Raza Khawaja', True, green)
+textRect = text.get_rect()
+textRect1 = text1.get_rect()
+textRect2 = text2.get_rect()
+textRect3 = text3.get_rect()
+textRect4 = text4.get_rect()
+textRect5 = text5.get_rect()
+textRect6 = text6.get_rect()
+textRect.center = (400,100)
+textRect1.center = (200,350)
+textRect2.center = (600,350)
+textRect3.center = (400,400)
+textRect4.center = (400,400)
+textRect5.center = (400,400)
+textRect6.center = (400,700)
+
+
+
+
+
+saki=''
+
+quitgame=False
+
+while not quitgame:
     for event in pygame.event.get():
-
         if event.type == pygame.QUIT:
+            quitgame= True
+            pygame.quit()
+            quit()
 
-            run = False
+        gamedisplay.blit(text, textRect)
+        pygame.draw.rect(gamedisplay,(66,134,244),[100,300,200,100])
+        gamedisplay.blit(text1,textRect1)
+        pygame.draw.rect(gamedisplay,(66,134,244),[500,300,200,100])
+        gamedisplay.blit(text2,textRect2)
+        gamedisplay.blit(text6, textRect6)
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not game_over:
+        if event.type==pygame.MOUSEBUTTONDOWN:
+            coord = pygame.mouse.get_pos()
+            if coord[0]>=100 and coord[0]<=300 and coord[1]>=300 and coord[1]<=400:
+                saki='ai'
+                quitgame=True
+            if coord[0]>=500 and coord[0]<=700 and coord[1]>=300 and coord[1]<=400:
+                saki='2 player'
+                quitgame=True
 
-            x_coord = event.pos[0] // 100
 
-            y_coord = event.pos[1] // 100
+        pygame.display.update()
+        clock.tick(60)
 
-            click_coords = (x_coord, y_coord)
 
-            if turn_step <= 1:
 
-                if click_coords == (8, 8) or click_coords == (9, 8):
 
-                    winner = 'black'
 
-                if click_coords in white_locations:
 
-                    selection = white_locations.index(click_coords)
+def square(x,y,w,h,color):
+    pygame.draw.rect(gamedisplay,color,[x,y,w,h])
+    allTiles.append([color, [x,y,w,h]])
 
-                    if turn_step == 0:
+def drawchesspieces():
+    xpos= 0
+    ypos= 0
+    color= 0
+    width= 100
+    height= 100
+    black= (66,134,244)
+    white=(143,155,175)
+    number=0
+
+    for rows in range(8):
+        for column in range(8):
+            if color%2==0:
+                square(xpos,ypos,width,height,white)
+                if not chessBoard.gameTiles[rows][column].pieceonTile.tostring() == "-":
+                    img = pygame.image.load("./chessart/"
+                                            + chessBoard.gameTiles[rows][column].pieceonTile.alliance[0].upper()
+                                            + chessBoard.gameTiles[rows][column].pieceonTile.tostring().upper()
+                                            + ".png")
+                    img=pygame.transform.scale(img, (100,100))
+                    allpieces.append([img,[xpos,ypos],chessBoard.gameTiles[rows][column].pieceonTile])
+
+                xpos +=100
+
+            else:
+                square(xpos,ypos,width,height,black)
+                if not chessBoard.gameTiles[rows][column].pieceonTile.tostring() == "-":
+                    img = pygame.image.load("./chessart/"
+                                        + chessBoard.gameTiles[rows][column].pieceonTile.alliance[0].upper()
+                                        + chessBoard.gameTiles[rows][column].pieceonTile.tostring().upper()
+                                        + ".png")
+                    img=pygame.transform.scale(img, (100,100))
+                    allpieces.append([img,[xpos,ypos],chessBoard.gameTiles[rows][column].pieceonTile])
+
+                xpos +=100
+
+            color +=1
+            number +=1
+
+        color +=1
+        xpos=0
+        ypos+=100
+        for img in allpieces:
+            gamedisplay.blit(img[0],img[1])
+
+drawchesspieces()
+
+
+def updateposition(x,y):
+    a=x*8
+    b=a+y
+    return b
 
-                        turn_step = 1
+def givecolour(x,y):
 
-                if click_coords in valid_moves and selection != 100:
+    if y%2==0:
+        if x%2==0:
+            return [143,155,175]
+        else:
+            return [66,134,244]
 
-                    white_locations[selection] = click_coords
+    else:
+        if x%2==0:
+            return [66,134,244]
+        else:
+            return[143,155,175]
 
-                    if click_coords in black_locations:
 
-                        black_piece = black_locations.index(click_coords)
 
-                        captured_pieces_white.append(black_pieces[black_piece])
 
-                        if black_pieces[black_piece] == 'king':
+if saki=='2 player':
 
-                            winner = 'white'
-
-                        black_pieces.pop(black_piece)
-
-                        black_locations.pop(black_piece)
-
-                    black_options = check_options(
-
-                        black_pieces, black_locations, 'black')
-
-                    white_options = check_options(
-
-                        white_pieces, white_locations, 'white')
-
-                    turn_step = 2
-
-                    selection = 100
-
-                    valid_moves = []
-
-            if turn_step > 1:
-
-                if click_coords == (8, 8) or click_coords == (9, 8):
-
-                    winner = 'white'
-
-                if click_coords in black_locations:
-
-                    selection = black_locations.index(click_coords)
-
-                    if turn_step == 2:
-
-                        turn_step = 3
-
-                if click_coords in valid_moves and selection != 100:
-
-                    black_locations[selection] = click_coords
-
-                    if click_coords in white_locations:
-
-                        white_piece = white_locations.index(click_coords)
-
-                        captured_pieces_black.append(white_pieces[white_piece])
-
-                        if white_pieces[white_piece] == 'king':
-
-                            winner = 'black'
-
-                        white_pieces.pop(white_piece)
-
-                        white_locations.pop(white_piece)
-
-                    black_options = check_options(
-
-                        black_pieces, black_locations, 'black')
-
-                    white_options = check_options(
-
-                        white_pieces, white_locations, 'white')
-
-                    turn_step = 0
-
-                    selection = 100
-
-                    valid_moves = []
-
-        if event.type == pygame.KEYDOWN and game_over:
-
-            if event.key == pygame.K_RETURN:
-
-                game_over = False
-
-                winner = ''
-
-                white_pieces = ['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook',
-
-                                'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn']
-
-                white_locations = [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
-
-                                   (0, 1), (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1)]
-
-                black_pieces = ['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook',
-
-                                'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn']
-
-                black_locations = [(0, 7), (1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7),
-
-                                   (0, 6), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6)]
-
-                captured_pieces_white = []
-
-                captured_pieces_black = []
-
-                turn_step = 0
-
-                selection = 100
-
-                valid_moves = []
-
-                black_options = check_options(
-
-                    black_pieces, black_locations, 'black')
-
-                white_options = check_options(
-
-                    white_pieces, white_locations, 'white')
-
- 
-
-    if winner != '':
-
-        game_over = True
-
-        draw_game_over()
-
- 
-
-    pygame.display.flip()
-pygame.quit()
+    moves=[]
+    enpassant=[]
+    promote=[]
+    promotion=False
+    turn=0
+
+    array=[]
+    quitgame=False
+
+    while not quitgame:
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                quitgame= True
+                pygame.quit()
+                quit()
+
+            if movex.checkw(chessBoard.gameTiles)[0]=='checked' and len(moves)==0 :
+                array=movex.movesifcheckedw(chessBoard.gameTiles)
+                if len(array)==0:
+                    saki='end1'
+                    quitgame=True
+
+            if movex.checkb(chessBoard.gameTiles)[0]=='checked' and len(moves)==0 :
+                array=movex.movesifcheckedb(chessBoard.gameTiles)
+                if len(array)==0:
+                    saki='end2'
+                    quitgame=True
+
+
+            if movex.checkb(chessBoard.gameTiles)[0]=='notchecked' and turn%2==1 and len(moves)==0 :
+                check=False
+                for x in range(8):
+                    for y in range(8):
+                        if chessBoard.gameTiles[y][x].pieceonTile.alliance=='Black' and turn%2==1:
+                            moves1=chessBoard.gameTiles[y][x].pieceonTile.legalmoveb(chessBoard.gameTiles)
+                            lx1=movex.pinnedb(chessBoard.gameTiles,moves1,y,x)
+                            if len(lx1)==0:
+                                continue
+                            else:
+                                check=True
+                            if check==True:
+                                break
+                    if check==True:
+                        break
+
+
+                if check==False:
+                    saki='end3'
+                    quitgame=True
+
+            if movex.checkw(chessBoard.gameTiles)[0]=='notchecked' and turn%2==0 and len(moves)==0 :
+                check=False
+                for x in range(8):
+                    for y in range(8):
+                        if chessBoard.gameTiles[y][x].pieceonTile.alliance=='White' and turn%2==0:
+                            moves1=chessBoard.gameTiles[y][x].pieceonTile.legalmoveb(chessBoard.gameTiles)
+                            lx1=movex.pinnedw(chessBoard.gameTiles,moves1,y,x)
+                            if len(lx1)==0:
+                                continue
+                            else:
+                                check=True
+                            if check==True:
+                                break
+                    if check==True:
+                        break
+
+
+                if check==False:
+                    saki='end3'
+                    quitgame=True
+
+                                
+
+
+
+
+
+
+
+
+
+            if event.type==pygame.MOUSEBUTTONDOWN:
+                if movex.checkw(chessBoard.gameTiles)[0]=='checked' and len(moves)==0 :
+                    array=movex.movesifcheckedw(chessBoard.gameTiles)
+                    coord=pygame.mouse.get_pos()
+                    m=math.floor(coord[0]/100)
+                    n=math.floor(coord[1]/100)
+                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    mx=[]
+                    ma=[]
+                    for move in array:
+                        if(move[1]==m and move[0]==n):
+                            mx=[move[3]*100,move[2]*100]
+                            ma=[move[2],move[3]]
+                            moves.append(ma)
+                            gamedisplay.blit(imgx,mx)
+                            x=move[1]
+                            y=move[0]
+                    break
+
+                if movex.checkb(chessBoard.gameTiles)[0]=='checked' and len(moves)==0 :
+                    array=movex.movesifcheckedb(chessBoard.gameTiles)
+                    coord=pygame.mouse.get_pos()
+                    m=math.floor(coord[0]/100)
+                    n=math.floor(coord[1]/100)
+                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    mx=[]
+                    ma=[]
+                    for move in array:
+                        if(move[1]==m and move[0]==n):
+                            mx=[move[3]*100,move[2]*100]
+                            ma=[move[2],move[3]]
+                            moves.append(ma)
+                            gamedisplay.blit(imgx,mx)
+                            x=move[1]
+                            y=move[0]
+                    break
+
+                if not len(promote)==0:
+                    coord = pygame.mouse.get_pos()
+                    m=math.floor(coord[0]/100)
+                    n=math.floor(coord[1]/100)
+                    if  chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile.alliance=='Black':
+                        for i in range(len(promote)):
+                            if i==4:
+                                turn=turn-1
+                                break
+                            if promote[i][0]==n and promote[i][1]==m:
+                                if i==0:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=queen('Black',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+                                if i==1:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=rook('Black',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+                                if i==2:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=knight('Black',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+                                if i==3:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=bishop('Black',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+
+                    if  chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile.alliance=='White':
+                        for i in range(len(promote)):
+                            if i==4:
+                                turn=turn-1
+                                break
+                            if promote[i][0]==n and promote[i][1]==m:
+                                if i==0:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=queen('White',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+                                if i==1:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=rook('White',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+                                if i==2:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=knight('White',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+                                if i==3:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=bishop('White',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+
+                    allTiles.clear()
+                    allpieces.clear()
+                    chessBoard.printboard()
+                    drawchesspieces()
+                    promote=[]
+                    promotion=False
+
+
+
+
+
+
+
+                if not len(moves)==0:
+                    coord = pygame.mouse.get_pos()
+                    m=math.floor(coord[0]/100)
+                    n=math.floor(coord[1]/100)
+                    for move in moves:
+                        if move[0]==n and move[1]==m:
+                            turn=turn+1
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='K' or chessBoard.gameTiles[y][x].pieceonTile.tostring()=='R' or chessBoard.gameTiles[y][x].pieceonTile.tostring()=='k' or chessBoard.gameTiles[y][x].pieceonTile.tostring()=='r':
+                                chessBoard.gameTiles[y][x].pieceonTile.moved=True
+
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='K' and m==x+2:
+                                chessBoard.gameTiles[y][x+1].pieceonTile=chessBoard.gameTiles[y][x+3].pieceonTile
+                                s=updateposition(y,x+1)
+                                chessBoard.gameTiles[y][x+1].pieceonTile.position=s
+                                chessBoard.gameTiles[y][x+3].pieceonTile=nullpiece()
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='K' and m==x-2:
+                                chessBoard.gameTiles[y][x-1].pieceonTile=chessBoard.gameTiles[y][0].pieceonTile
+                                s=updateposition(y,x-1)
+                                chessBoard.gameTiles[y][x-1].pieceonTile.position=s
+                                chessBoard.gameTiles[y][0].pieceonTile=nullpiece()
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='k' and m==x+2:
+                                chessBoard.gameTiles[y][x+1].pieceonTile=chessBoard.gameTiles[y][x+3].pieceonTile
+                                s=updateposition(y,x+1)
+                                chessBoard.gameTiles[y][x+1].pieceonTile.position=s
+                                chessBoard.gameTiles[y][x+3].pieceonTile=nullpiece()
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='k' and m==x-2:
+                                chessBoard.gameTiles[y][x-1].pieceonTile=chessBoard.gameTiles[y][0].pieceonTile
+                                s=updateposition(y,x-1)
+                                chessBoard.gameTiles[y][x-1].pieceonTile.position=s
+                                chessBoard.gameTiles[y][0].pieceonTile=nullpiece()
+
+
+
+                            if not len(enpassant)==0:
+                                chessBoard.gameTiles[enpassant[0]][enpassant[1]].pieceonTile.enpassant=False
+                                enpassant=[]
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and y+1==n and x+1==m and chessBoard.gameTiles[n][m].pieceonTile.tostring()=='-':
+                                chessBoard.gameTiles[y][x+1].pieceonTile=nullpiece()
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and y+1==n and x-1==m and chessBoard.gameTiles[n][m].pieceonTile.tostring()=='-':
+                                chessBoard.gameTiles[y][x-1].pieceonTile=nullpiece()
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and y-1==n and x+1==m and chessBoard.gameTiles[n][m].pieceonTile.tostring()=='-':
+                                chessBoard.gameTiles[y][x+1].pieceonTile=nullpiece()
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and y-1==n and x-1==m and chessBoard.gameTiles[n][m].pieceonTile.tostring()=='-':
+                                chessBoard.gameTiles[y][x-1].pieceonTile=nullpiece()
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and n==y-2:
+                                chessBoard.gameTiles[y][x].pieceonTile.enpassant=True
+                                enpassant=[n,m]
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and n==y+2:
+                                chessBoard.gameTiles[y][x].pieceonTile.enpassant=True
+                                enpassant=[n,m]
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and y+1==n and y==6:
+                                promotion=True
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and y-1==n and y==1:
+                                promotion=True
+
+
+                            if promotion==False:
+
+                                chessBoard.gameTiles[n][m].pieceonTile=chessBoard.gameTiles[y][x].pieceonTile
+                                chessBoard.gameTiles[y][x].pieceonTile=nullpiece()
+                                s=updateposition(n,m)
+                                chessBoard.gameTiles[n][m].pieceonTile.position=s
+                    if promotion==False:
+                        allTiles.clear()
+                        allpieces.clear()
+                        chessBoard.printboard()
+                        drawchesspieces()
+                        moves=[]
+
+                    if promotion==True:
+                        if  chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and x==7 and y==6:
+                            pygame.draw.rect(gamedisplay,(255,255,255),[x*100-100,(y*100)-200,200,200])
+                            imgx=pygame.transform.scale(pygame.image.load("./chessart/BQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/BR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/BN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/BB.png",), (100,100))
+                            gamedisplay.blit(imgx,[x*100-100,(y*100)-200])
+                            gamedisplay.blit(imgx1,[(x*100),(y*100)-200])
+                            gamedisplay.blit(imgx2,[x*100-100,(y*100)-100])
+                            gamedisplay.blit(imgx3,[(x*100),(y*100)-100])
+                            promote=[[y-2,x-1],[y-2,x],[y-1,x],[y-1,x],[m,n],[y,x]]
+
+                        elif chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P':
+                            pygame.draw.rect(gamedisplay,(255,255,255),[x*100,(y*100)-200,200,200])
+                            imgx=pygame.transform.scale(pygame.image.load("./chessart/BQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/BR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/BN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/BB.png",), (100,100))
+                            gamedisplay.blit(imgx,[x*100,(y*100)-200])
+                            gamedisplay.blit(imgx1,[(x*100)+100,(y*100)-200])
+                            gamedisplay.blit(imgx2,[x*100,(y*100)-100])
+                            gamedisplay.blit(imgx3,[(x*100)+100,(y*100)-100])
+                            promote=[[y-2,x],[y-2,x+1],[y-1,x],[y-1,x+1],[m,n],[y,x]]
+
+                        elif  chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and x==7 and y==1:
+                            pygame.draw.rect(gamedisplay,(0,0,0),[x*100-100,(y*100)+100,200,200])
+                            imgx=pygame.transform.scale(pygame.image.load("./chessart/WQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/WR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/WN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/WB.png",), (100,100))
+                            gamedisplay.blit(imgx,[x*100-100,(y*100)+200])
+                            gamedisplay.blit(imgx1,[(x*100),(y*100)+200])
+                            gamedisplay.blit(imgx2,[x*100-100,(y*100)+100])
+                            gamedisplay.blit(imgx3,[(x*100),(y*100)+100])
+                            promote=[[y+2,x-1],[y+2,x],[y+1,x],[y+1,x],[m,n],[y,x]]
+
+                        elif chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p':
+                            pygame.draw.rect(gamedisplay,(0,0,0),[x*100,(y*100)+100,200,200])
+                            imgx=pygame.transform.scale(pygame.image.load("./chessart/WQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/WR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/WN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/WB.png",), (100,100))
+                            gamedisplay.blit(imgx,[x*100,(y*100)+200])
+                            gamedisplay.blit(imgx1,[(x*100)+100,(y*100)+200])
+                            gamedisplay.blit(imgx2,[x*100,(y*100)+100])
+                            gamedisplay.blit(imgx3,[(x*100)+100,(y*100)+100])
+                            promote=[[y+2,x],[y+2,x+1],[y+1,x],[y+1,x+1],[m,n],[y,x]]
+
+
+
+
+
+
+
+
+
+
+                else:
+                    drawchesspieces()
+                    coords = pygame.mouse.get_pos()
+                    x=math.floor(coords[0]/100)
+                    y=math.floor(coords[1]/100)
+                    mx=[]
+                    if(not chessBoard.gameTiles[y][x].pieceonTile.tostring()=='-'):
+                        moves=chessBoard.gameTiles[y][x].pieceonTile.legalmoveb(chessBoard.gameTiles)
+                        if(chessBoard.gameTiles[y][x].pieceonTile.tostring()=='K'):
+                            ax=movex.castlingb(chessBoard.gameTiles)
+                            if not len(ax)==0:
+                                for l in ax:
+                                    if l=='ks':
+                                        moves.append([0,6])
+                                    if l=='qs':
+                                        moves.append([0,2])
+                        if(chessBoard.gameTiles[y][x].pieceonTile.tostring()=='k'):
+                            ax=movex.castlingw(chessBoard.gameTiles)
+                            if not len(ax)==0:
+                                for l in ax:
+                                    if l=='ks':
+                                        moves.append([7,6])
+                                    if l=='qs':
+                                        moves.append([7,2])
+                        if(chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P'):
+                            ay=movex.enpassantb(chessBoard.gameTiles,y,x)
+                            if not len(ay)==0:
+                                if ay[1]=='r':
+                                    moves.append([y+1,x+1])
+                                else:
+                                    moves.append([y+1,x-1])
+
+                        if(chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p'):
+                            ay=movex.enpassantb(chessBoard.gameTiles,y,x)
+                            if not len(ay)==0:
+                                if ay[1]=='r':
+                                    moves.append([y-1,x+1])
+                                else:
+                                    moves.append([y-1,x-1])
+
+
+                    if chessBoard.gameTiles[y][x].pieceonTile.alliance=='Black':
+                        lx=movex.pinnedb(chessBoard.gameTiles,moves,y,x)
+                    if chessBoard.gameTiles[y][x].pieceonTile.alliance=='White':
+                        lx=movex.pinnedw(chessBoard.gameTiles,moves,y,x)
+                    moves=lx
+
+                    if turn%2==0:
+                        if chessBoard.gameTiles[y][x].pieceonTile.alliance=='Black':
+                            moves=[]
+                    else:
+                        if chessBoard.gameTiles[y][x].pieceonTile.alliance=='White':
+                            moves=[]
+
+
+                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    for move in moves:
+                        mx=[move[1]*100,move[0]*100]
+                        gamedisplay.blit(imgx,mx)
+
+
+
+
+
+
+
+
+
+        for img in allpieces:
+            gamedisplay.blit(img[0],img[1])
+
+
+
+
+        pygame.display.update()
+        clock.tick(60)
+
+if saki=='ai':
+
+    moves=[]
+    enpassant=[]
+    promote=[]
+    promotion=False
+    turn=0
+
+    array=[]
+    quitgame=False
+
+    while not quitgame:
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                quitgame= True
+                pygame.quit()
+                quit()
+
+
+            if movex.checkw(chessBoard.gameTiles)[0]=='checked' and len(moves)==0 :
+                array=movex.movesifcheckedw(chessBoard.gameTiles)
+                if len(array)==0:
+                    saki='end1'
+                    quitgame=True
+                    break
+
+            if movex.checkb(chessBoard.gameTiles)[0]=='checked' and len(moves)==0 :
+                array=movex.movesifcheckedb(chessBoard.gameTiles)
+                if len(array)==0:
+                    saki='end2'
+                    quitgame=True
+                    break
+
+
+            if movex.checkb(chessBoard.gameTiles)[0]=='notchecked' and turn%2==1 and len(moves)==0 :
+                check=False
+                for x in range(8):
+                    for y in range(8):
+                        if chessBoard.gameTiles[y][x].pieceonTile.alliance=='Black' and turn%2==1:
+                            moves1=chessBoard.gameTiles[y][x].pieceonTile.legalmoveb(chessBoard.gameTiles)
+                            lx1=movex.pinnedb(chessBoard.gameTiles,moves1,y,x)
+                            if len(lx1)==0:
+                                continue
+                            else:
+                                check=True
+                            if check==True:
+                                break
+                    if check==True:
+                        break
+
+
+                if check==False:
+                    saki='end3'
+                    quitgame=True
+                    break
+
+            if movex.checkw(chessBoard.gameTiles)[0]=='notchecked' and turn%2==0 and len(moves)==0 :
+                check=False
+                for x in range(8):
+                    for y in range(8):
+                        if chessBoard.gameTiles[y][x].pieceonTile.alliance=='White' and turn%2==0:
+                            moves1=chessBoard.gameTiles[y][x].pieceonTile.legalmoveb(chessBoard.gameTiles)
+                            lx1=movex.pinnedw(chessBoard.gameTiles,moves1,y,x)
+                            if len(lx1)==0:
+                                continue
+                            else:
+                                check=True
+                            if check==True:
+                                break
+                    if check==True:
+                        break
+
+
+                if check==False:
+                    saki='end3'
+                    quitgame=True
+
+
+
+
+
+            if not turn%2==0 and promotion==False:
+
+                turn=turn+1
+                sc=copy.deepcopy(chessBoard.gameTiles)
+                y,x,fx,fy=ai.evaluate(sc)
+                m=fy
+                n=fx
+                if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='K' or chessBoard.gameTiles[y][x].pieceonTile.tostring()=='R':
+                    chessBoard.gameTiles[y][x].pieceonTile.moved=True
+
+                if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='K' and m==x+2:
+                    chessBoard.gameTiles[y][x+1].pieceonTile=chessBoard.gameTiles[y][x+3].pieceonTile
+                    s=updateposition(y,x+1)
+                    chessBoard.gameTiles[y][x+1].pieceonTile.position=s
+                    chessBoard.gameTiles[y][x+3].pieceonTile=nullpiece()
+                if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='K' and m==x-2:
+                    chessBoard.gameTiles[y][x-1].pieceonTile=chessBoard.gameTiles[y][0].pieceonTile
+                    s=updateposition(y,x-1)
+                    chessBoard.gameTiles[y][x-1].pieceonTile.position=s
+                    chessBoard.gameTiles[y][0].pieceonTile=nullpiece()
+
+
+                if not len(enpassant)==0:
+                    chessBoard.gameTiles[enpassant[0]][enpassant[1]].pieceonTile.enpassant=False
+                    enpassant=[]
+                if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and y+1==n and x+1==m and chessBoard.gameTiles[n][m].pieceonTile.tostring()=='-':
+                    chessBoard.gameTiles[y][x+1].pieceonTile=nullpiece()
+                if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and y+1==n and x-1==m and chessBoard.gameTiles[n][m].pieceonTile.tostring()=='-':
+                    chessBoard.gameTiles[y][x-1].pieceonTile=nullpiece()
+
+                if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and n==y+2:
+                    chessBoard.gameTiles[y][x].pieceonTile.enpassant=True
+                    enpassant=[n,m]
+
+                if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P' and y+1==n and y==6:
+                    promotion=True
+
+
+                if promotion==False:
+
+                    chessBoard.gameTiles[n][m].pieceonTile=chessBoard.gameTiles[y][x].pieceonTile
+                    chessBoard.gameTiles[y][x].pieceonTile=nullpiece()
+                    s=updateposition(n,m)
+                    chessBoard.gameTiles[n][m].pieceonTile.position=s
+                    allTiles.clear()
+                    allpieces.clear()
+                    chessBoard.printboard()
+                    drawchesspieces()
+                    moves=[]
+
+                if promotion==True:
+
+                    if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='P':
+                        chessBoard.gameTiles[y][x].pieceonTile=nullpiece()
+                        chessBoard.gameTiles[n][m].pieceonTile=queen('Black',updateposition(n,m))
+                        allTiles.clear()
+                        allpieces.clear()
+                        chessBoard.printboard()
+                        drawchesspieces()
+                        moves=[]
+                        promote=[]
+                        promotion=False
+
+
+
+
+
+
+            if event.type==pygame.MOUSEBUTTONDOWN:
+                if movex.checkw(chessBoard.gameTiles)[0]=='checked' and len(moves)==0 :
+                    array=movex.movesifcheckedw(chessBoard.gameTiles)
+                    coord=pygame.mouse.get_pos()
+                    m=math.floor(coord[0]/100)
+                    n=math.floor(coord[1]/100)
+                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    mx=[]
+                    ma=[]
+                    for move in array:
+                        if(move[1]==m and move[0]==n):
+                            mx=[move[3]*100,move[2]*100]
+                            ma=[move[2],move[3]]
+                            moves.append(ma)
+                            gamedisplay.blit(imgx,mx)
+                            x=move[1]
+                            y=move[0]
+                    break
+
+                if not len(promote)==0:
+                    coord = pygame.mouse.get_pos()
+                    m=math.floor(coord[0]/100)
+                    n=math.floor(coord[1]/100)
+                    if  chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile.alliance=='White':
+                        for i in range(len(promote)):
+                            if i==4:
+                                turn=turn-1
+                                break
+                            if promote[i][0]==n and promote[i][1]==m:
+                                if i==0:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=queen('White',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+                                if i==1:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=rook('White',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+                                if i==2:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=knight('White',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+                                if i==3:
+                                    chessBoard.gameTiles[promote[4][1]][promote[4][0]].pieceonTile=bishop('White',updateposition(promote[4][1],promote[4][0]))
+                                    chessBoard.gameTiles[promote[5][0]][promote[5][1]].pieceonTile=nullpiece()
+                                    break
+
+                    allTiles.clear()
+                    allpieces.clear()
+                    chessBoard.printboard()
+                    drawchesspieces()
+                    promote=[]
+                    promotion=False
+
+
+
+
+
+
+
+                if not len(moves)==0:
+                    coord = pygame.mouse.get_pos()
+                    m=math.floor(coord[0]/100)
+                    n=math.floor(coord[1]/100)
+                    for move in moves:
+                        if move[0]==n and move[1]==m:
+                            turn=turn+1
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='k' or chessBoard.gameTiles[y][x].pieceonTile.tostring()=='r':
+                                chessBoard.gameTiles[y][x].pieceonTile.moved=True
+
+
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='k' and m==x+2:
+                                chessBoard.gameTiles[y][x+1].pieceonTile=chessBoard.gameTiles[y][x+3].pieceonTile
+                                s=updateposition(y,x+1)
+                                chessBoard.gameTiles[y][x+1].pieceonTile.position=s
+                                chessBoard.gameTiles[y][x+3].pieceonTile=nullpiece()
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='k' and m==x-2:
+                                chessBoard.gameTiles[y][x-1].pieceonTile=chessBoard.gameTiles[y][0].pieceonTile
+                                s=updateposition(y,x-1)
+                                chessBoard.gameTiles[y][x-1].pieceonTile.position=s
+                                chessBoard.gameTiles[y][0].pieceonTile=nullpiece()
+
+
+
+                            if not len(enpassant)==0:
+                                chessBoard.gameTiles[enpassant[0]][enpassant[1]].pieceonTile.enpassant=False
+                                enpassant=[]
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and y-1==n and x+1==m and chessBoard.gameTiles[n][m].pieceonTile.tostring()=='-':
+                                chessBoard.gameTiles[y][x+1].pieceonTile=nullpiece()
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and y-1==n and x-1==m and chessBoard.gameTiles[n][m].pieceonTile.tostring()=='-':
+                                chessBoard.gameTiles[y][x-1].pieceonTile=nullpiece()
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and n==y-2:
+                                chessBoard.gameTiles[y][x].pieceonTile.enpassant=True
+                                enpassant=[n,m]
+
+
+                            if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and y-1==n and y==1:
+                                promotion=True
+
+
+
+                            if promotion==False:
+
+                                chessBoard.gameTiles[n][m].pieceonTile=chessBoard.gameTiles[y][x].pieceonTile
+                                chessBoard.gameTiles[y][x].pieceonTile=nullpiece()
+                                s=updateposition(n,m)
+                                chessBoard.gameTiles[n][m].pieceonTile.position=s
+                    if promotion==False:
+                        allTiles.clear()
+                        allpieces.clear()
+                        chessBoard.printboard()
+                        drawchesspieces()
+                        moves=[]
+
+                    if promotion==True:
+
+
+
+
+                        if  chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p' and x==7 and y==1:
+                            pygame.draw.rect(gamedisplay,(0,0,0),[x*100-100,(y*100)+100,200,200])
+                            imgx=pygame.transform.scale(pygame.image.load("./chessart/WQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/WR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/WN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/WB.png",), (100,100))
+                            gamedisplay.blit(imgx,[x*100-100,(y*100)+200])
+                            gamedisplay.blit(imgx1,[(x*100),(y*100)+200])
+                            gamedisplay.blit(imgx2,[x*100-100,(y*100)+100])
+                            gamedisplay.blit(imgx3,[(x*100),(y*100)+100])
+                            promote=[[y+2,x-1],[y+2,x],[y+1,x],[y+1,x],[m,n],[y,x]]
+
+                        elif chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p':
+                            pygame.draw.rect(gamedisplay,(0,0,0),[x*100,(y*100)+100,200,200])
+                            imgx=pygame.transform.scale(pygame.image.load("./chessart/WQ.png",), (100,100))
+                            imgx1=pygame.transform.scale(pygame.image.load("./chessart/WR.png",), (100,100))
+                            imgx2=pygame.transform.scale(pygame.image.load("./chessart/WN.png",), (100,100))
+                            imgx3=pygame.transform.scale(pygame.image.load("./chessart/WB.png",), (100,100))
+                            gamedisplay.blit(imgx,[x*100,(y*100)+200])
+                            gamedisplay.blit(imgx1,[(x*100)+100,(y*100)+200])
+                            gamedisplay.blit(imgx2,[x*100,(y*100)+100])
+                            gamedisplay.blit(imgx3,[(x*100)+100,(y*100)+100])
+                            promote=[[y+2,x],[y+2,x+1],[y+1,x],[y+1,x+1],[m,n],[y,x]]
+
+
+
+
+
+
+
+
+
+
+                else:
+                    drawchesspieces()
+                    coords = pygame.mouse.get_pos()
+                    x=math.floor(coords[0]/100)
+                    y=math.floor(coords[1]/100)
+                    mx=[]
+                    if(chessBoard.gameTiles[y][x].pieceonTile.alliance=='White'):
+                        moves=chessBoard.gameTiles[y][x].pieceonTile.legalmoveb(chessBoard.gameTiles)
+                        if(chessBoard.gameTiles[y][x].pieceonTile.tostring()=='k'):
+                            ax=movex.castlingw(chessBoard.gameTiles)
+                            if not len(ax)==0:
+                                for l in ax:
+                                    if l=='ks':
+                                        moves.append([7,6])
+                                    if l=='qs':
+                                        moves.append([7,2])
+                        if(chessBoard.gameTiles[y][x].pieceonTile.tostring()=='p'):
+                            ay=movex.enpassantb(chessBoard.gameTiles,y,x)
+                            if not len(ay)==0:
+                                if ay[1]=='r':
+                                    moves.append([y-1,x+1])
+                                else:
+                                    moves.append([y-1,x-1])
+
+
+                    if chessBoard.gameTiles[y][x].pieceonTile.alliance=='White':
+                        lx=movex.pinnedw(chessBoard.gameTiles,moves,y,x)
+                    moves=lx
+
+                    if not turn%2==0:
+                        moves=[]
+
+                    if chessBoard.gameTiles[y][x].pieceonTile.alliance=='Black':
+                        moves=[]
+
+                    if chessBoard.gameTiles[y][x].pieceonTile.tostring()=='-':
+                        moves=[]
+
+
+                    imgx=pygame.transform.scale(pygame.image.load("./chessart/red_square.png",), (100,100))
+                    for move in moves:
+                        mx=[move[1]*100,move[0]*100]
+                        gamedisplay.blit(imgx,mx)
+
+
+
+
+
+
+
+
+
+        for img in allpieces:
+            gamedisplay.blit(img[0],img[1])
+
+
+
+
+        pygame.display.update()
+        clock.tick(60)
+
+
+if saki=='end1':
+    quitgame=False
+    while not quitgame:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quitgame= True
+                pygame.quit()
+                quit()
+
+            gamedisplay.blit(text3,textRect3)
+
+
+            pygame.display.update()
+            clock.tick(60)
+
+if saki=='end2':
+    quitgame=False
+    while not quitgame:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quitgame= True
+                pygame.quit()
+                quit()
+
+            gamedisplay.blit(text4,textRect4)
+         #  pygame.draw.rect(gamedisplay,(66,134,244),[400,400,400,400])
+
+
+            pygame.display.update()
+            clock.tick(60)
+
+if saki=='end3':
+    quitgame=False
+    while not quitgame:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quitgame= True
+                pygame.quit()
+                quit()
+
+            gamedisplay.blit(text5,textRect5)
+            #  pygame.draw.rect(gamedisplay,(66,134,244),[400,400,400,400])
+
+
+            pygame.display.update()
+            clock.tick(60)
